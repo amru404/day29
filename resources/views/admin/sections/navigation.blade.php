@@ -4,6 +4,7 @@
             <a href="{{ route('admin.dashboard') }}" class="site_title">
                 <span>{{ config('app.name') }}</span>
             </a>
+            
         </div>
 
         <div class="clearfix"></div>
@@ -52,6 +53,11 @@
                         <a href="{{ route('admin.dashboard') }}">
                             <i class="fa fa-home" aria-hidden="true"></i>
                             {{ __('views.backend.section.navigation.menu_0_1') }}
+                        </a>
+
+                        <a href="{{ route('admin.dashboard.reporting') }}">
+                            <i class="fa fa-home" aria-hidden="true"></i>
+                            {{ __('views.backend.section.navigation.menu_0_2') }}
                         </a>
                     </li>
                 </ul>

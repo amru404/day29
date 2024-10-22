@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Spatie\QueryBuilder\QueryBuilder;
 use App\Models\Auth\User\User;
+use App\Models\Blog;
+use App\Models\Product;
 use Arcanedev\LogViewer\Entities\Log;
 use Arcanedev\LogViewer\Entities\LogEntry;
 use Carbon\Carbon;
@@ -106,4 +109,68 @@ class DashboardController extends Controller
 
         return response($data);
     }
-}
+
+    function getReporting(Request $request) {
+        $product = Product::all();
+        $testProduct = Product::query();
+
+        $testProduct->when($request->hargaAwal, function ($query) use ($request){
+            return $query->where('harga','=>', $request->hargaAwal, '&&', 'harga', '=', $request->hargaAkhir);
+        });
+        return view('admin.reporting',compact('product'));
+    }
+
+    function getAllProduct() {
+        $product = Product::all();
+        for ($i=0; $i <count($product) ; $i++) { 
+            if ($product[$i]['harga'] < 50000) {
+                $product[$i]['price_range'] = 'less_50000';
+            } else if ($product[$i]['harga'] >= 50000 && $product[$i]['harga'] < 99999){
+                $product[$i]['price_range'] = '_50000_99999';
+            } else if ($product[$i]['harga'] >= 100000 && $product[$i]['harga'] < 999999){
+                $product[$i]['price_range'] = '_100000_999999';
+            } else{
+                $product[$i]['price_range'] = 'more_1000000';
+            }
+            $product[$i]['created_range'] = substr($product[$i]['created_at'],0,7);
+
+        }
+        return response($product);
+    }
+
+    function getChartProduct(Request $request) {
+        $product = Product::all();
+
+        $less_50000 = 0;
+        $_50000_99999 = 0;
+        $_100000_999999 = 0;
+        $more_1000000 = 0;
+
+        for ($i = 0; $i < count($product); $i++) { 
+            // Classify price ranges
+            if ($product[$i]['harga'] < 50000) {
+                $product[$i]['price_range'] = 'less_50000';
+                $less_50000++;
+            } else if ($product[$i]['harga'] >= 50000 && $product[$i]['harga'] < 100000) {
+                $product[$i]['price_range'] = '_50000_99999';
+                $_50000_99999++; 
+            } else if ($product[$i]['harga'] >= 100000 && $product[$i]['harga'] < 1000000) {
+                $product[$i]['price_range'] = '_100000_999999';
+                $_100000_999999++; 
+            } else {
+                $product[$i]['price_range'] = 'more_1000000';
+                $more_1000000++;
+            }
+
+            $product[$i]['created_range'] = substr($product[$i]['created_at'], 0, 7);
+        }       
+            $data = [
+                "less_50000" => $less_50000,
+                "_50000_99999" => $_50000_99999,
+                "_100000_999999" => $_100000_999999,
+                "more_1000000" => $more_1000000,
+            ];
+
+            return response($data);
+        }
+    }
